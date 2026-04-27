@@ -1,0 +1,45 @@
+name: Check libro disponibilidad
+
+# Corre cada día a las 08:00 UTC (10:00 hora de Mallorca en verano, 09:00 en invierno)
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch: # permite lanzarlo a mano desde la web de GitHub
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: npm install
+
+      - name: Restore previous state
+        uses: actions/cache@v4
+        with:
+          path: seen-listings.json
+          key: libro-state-${{ github.run_id }}
+          restore-keys: |
+            libro-state-
+
+      - name: Run monitor
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+          NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
+        run: node monitor.js
+
+      - name: Persist state
+        uses: actions/upload-artifact@v4
+        with:
+          name: seen-listings
+          path: seen-listings.json
+          retention-days: 30
