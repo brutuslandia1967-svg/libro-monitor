@@ -1,0 +1,17 @@
+# 3. Inicializar git
+git init -b main
+
+# 4. Añadir todos los archivos
+git add .
+
+# 5. Verificar qué se va a subir (NO debe aparecer .env ni node_modules)
+git status
+
+# 6. Primer commit
+git commit -m "Initial commit: libro-monitor"
+
+# 7. Conectar con tu repo de GitHub
+git remote add origin https://github.com/brutuslandia1967-svg/libro-monitor.git
+
+# 8. Subir
+git push -u origin main
